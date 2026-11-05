@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PettiChat 十月短视频逐字稿分析 · 钩子 / CTA / 结构</title>
+<style>
+  :root{
+    --ink:#111827; --sub:#6b7280; --line:#e5e7eb; --bg:#f5f6f8; --card:#ffffff;
+    --accent:#e11d48; --accent-2:#f97316; --blue:#0ea5e9; --green:#10b981;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 64px}
+  .hero{background:linear-gradient(135deg,#111827 0%,#1f2937 55%,#3b0d1f 100%);color:#fff;border-radius:24px;padding:38px 36px 30px;position:relative;overflow:hidden}
+  .hero:after{content:"";position:absolute;right:-90px;top:-90px;width:280px;height:280px;border-radius:50%;
+    background:radial-gradient(circle,rgba(225,29,72,.55),rgba(225,29,72,0) 70%)}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:#fda4af;border:1px solid rgba(253,164,175,.35);border-radius:999px;padding:4px 12px}
+  h1{font-size:30px;line-height:1.3;margin:16px 0 10px;font-weight:700}
+  .hero p{margin:0;color:#d1d5db;max-width:640px;font-size:14px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;font-size:12px;color:#9ca3af}
+  .meta span{border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:3px 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+  .kpi{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px 14px}
+  .kpi b{display:block;font-size:22px;line-height:1.25;font-variant-numeric:tabular-nums}
+  .kpi small{color:#9ca3af;font-size:11.5px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:26px 26px 22px;margin-top:18px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+  .sec-no{font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);letter-spacing:.08em}
+  h2{font-size:19px;margin:0;font-weight:700;letter-spacing:.01em}
+  .sec-sub{color:var(--sub);font-size:13.5px;margin:2px 0 18px}
+  .callout{background:#fff1f2;border-left:3px solid var(--accent);border-radius:8px;padding:12px 14px;font-size:14px;margin:14px 0 4px}
+  .callout b{color:var(--accent)}
+  /* bars */
+  .bar-row{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:10px 0 14px}
+  .bar-label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#374151;min-width:0}
+  .bl-rank{font:600 11px/1 ui-monospace,Menlo,monospace;color:#9ca3af}
+  .bl-desc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+  .bl-date{color:#9ca3af;font-size:11px}
+  .bar-track{position:relative;height:20px;background:#f3f4f6;border-radius:6px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#e11d48,#fb7185)}
+  .bar-val{position:absolute;right:8px;top:0;line-height:20px;font:600 11px/20px ui-monospace,Menlo,monospace;color:#4b5563}
+  .mini-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:10px;margin:8px 0;font-size:12.5px}
+  .mini-k{color:#374151;font-weight:600}
+  .mini-track{height:8px;background:#f3f4f6;border-radius:99px;overflow:hidden}
+  .mini-fill{height:100%;background:var(--blue);border-radius:99px}
+  .mini-v{color:#6b7280;font-variant-numeric:tabular-nums;font-size:11.5px}
+  /* archetypes */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+  .arch{border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fcfcfd}
+  .arch h3{font-size:14px;margin:0 0 6px}
+  .arch .tag{display:inline-block;font-size:11px;color:#9f1239;background:#ffe4e6;border-radius:99px;padding:1px 8px;margin-bottom:8px}
+  .arch p{margin:0;color:var(--sub);font-size:12.5px;line-height:1.65}
+  .arch .perf{margin-top:10px;font:600 12px/1.4 ui-monospace,Menlo,monospace;color:#111827}
+  /* hooks */
+  .hooks{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .hook{border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:linear-gradient(180deg,#fff,#fbfbfc)}
+  .hook-tag{font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+  .hook blockquote{margin:8px 0;font-size:13.5px;color:#1f2937;line-height:1.6;border-left:2px solid #fecdd3;padding-left:10px}
+  .hook-stat{font-size:11.5px;color:#6b7280;font-variant-numeric:tabular-nums}
+  /* structure */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:6px}
+  .step{position:relative;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fcfcfd}
+  .step b{display:block;font-size:11.5px;color:var(--accent);font-family:ui-monospace,Menlo,monospace}
+  .step span{display:block;font-size:12.5px;color:#374151;margin-top:4px;line-height:1.55}
+  /* two col */
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .col{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fcfcfd}
+  .col h3{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:8px}
+  .dot{width:8px;height:8px;border-radius:50%}
+  .col ul{margin:0;padding-left:16px;color:#374151;font-size:13px;line-height:1.75}
+  /* recommendations */
+  ol.recs{margin:8px 0 0;padding-left:0;list-style:none;counter-reset:r}
+  ol.recs li{counter-increment:r;position:relative;padding:10px 12px 10px 42px;border-bottom:1px dashed var(--line);font-size:13.5px}
+  ol.recs li:last-child{border-bottom:0}
+  ol.recs li:before{content:counter(r,decimal-leading-zero);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:8px;
+    background:#111827;color:#fff;font:600 11px/28px ui-monospace,Menlo,monospace;text-align:center}
+  /* table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6b7280;font-weight:600;background:#fafafa}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.nowrap{white-space:nowrap}
+  td.rank{font:600 12px/1 ui-monospace,Menlo,monospace;color:#9ca3af}
+  td.txt{color:#4b5563}
+  tr:hover td{background:#fbfbfd}
+  /* misc */
+  .src-split{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:6px}
+  .src-item{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fcfcfd}
+  .src-num{font:700 22px/1.2 ui-monospace,Menlo,monospace}
+  .src-k{font-size:12.5px;font-weight:600;margin-top:4px}
+  .src-d{font-size:11.5px;color:var(--sub);margin-top:2px}
+  .note{font-size:12px;color:#6b7280;margin-top:14px;line-height:1.7}
+  .badge{display:inline-block;font-size:11px;border-radius:6px;padding:1px 7px;background:#f3f4f6;color:#4b5563;margin-right:6px}
+  footer{color:#9ca3af;font-size:11.5px;text-align:center;margin-top:26px;line-height:1.9}
+  footer code{background:#eef0f3;border-radius:4px;padding:1px 5px;color:#4b5563;font-size:11px}
+  @media (max-width:640px){
+    .hero{padding:26px 20px}
+    h1{font-size:23px}
+    section{padding:20px 16px}
+    .kpi b{font-size:19px}
+  }
+  @media print{
+    body{background:#fff}
+    .wrap{max-width:100%;padding:0}
+    section,.hero{break-inside:avoid;box-shadow:none}
+    .hero{background:#111827 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">PettiChat · Content Analysis</div>
+    <h1>十月短视频逐字稿分析<br>钩子 · CTA · 结构</h1>
+    <p>TikTok 42 条 + Instagram 9 条十月视频，49 条逐字稿（平台字幕 / 本地 Whisper ASR），拆解头部内容的开场钩子、转化路径与可复用结构。</p>
+    <div class="meta">
+      <span>数据窗口 2026-10-01 → 2026-11-02</span>
+      <span>样本 42 + 9 条</span>
+      <span>逐字稿覆盖 49 / 51</span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>1.11M</b><small>TikTok 总播放</small></div>
+      <div class="kpi"><b>58.5K</b><small>TikTok 总点赞</small></div>
+      <div class="kpi"><b>93%</b><small>Top 10 播放占比</small></div>
+      <div class="kpi"><b>24</b><small>平台字幕直取</small></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">01</span><h2>流量高度集中</h2></div>
+    <div class="sec-sub">TikTok 播放量 Top 12（相对条形长度按最高值归一）。头部单条 584.8K 播放，第 11 名起断崖。</div>
+    <div class='bar-row'><div class='bar-label'><span class='bl-rank'>01</span><span class='bl-desc'>The water is dangerous. Ge</span><span class='bl-date'>10-11</span></div><div class='bar-track'><div class='bar-fill' style='width:100.0%'></div><span class='bar-val'>584.8K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>02</span><span class='bl-desc'>Please don&#x27;t. Not again. O</span><span class='bl-date'>10-19</span></div><div class='bar-track'><div class='bar-fill' style='width:28.7%'></div><span class='bar-val'>167.8K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>03</span><span class='bl-desc'>not now why are you waking</span><span class='bl-date'>10-11</span></div><div class='bar-track'><div class='bar-fill' style='width:19.1%'></div><span class='bar-val'>111.5K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>04</span><span class='bl-desc'>The water is dangerous! Ge</span><span class='bl-date'>10-19</span></div><div class='bar-track'><div class='bar-fill' style='width:7.8%'></div><span class='bar-val'>45.5K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>05</span><span class='bl-desc'>You&#x27;re ridiculously cute. </span><span class='bl-date'>10-13</span></div><div class='bar-track'><div class='bar-fill' style='width:5.8%'></div><span class='bar-val'>33.8K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>06</span><span class='bl-desc'>Why are you here? Let&#x27;s se</span><span class='bl-date'>11-02</span></div><div class='bar-track'><div class='bar-fill' style='width:4.3%'></div><span class='bar-val'>24.9K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>07</span><span class='bl-desc'>品 JC ら新元 おーん あっと、やったけれos あ</span><span class='bl-date'>10-17</span></div><div class='bar-track'><div class='bar-fill' style='width:3.0%'></div><span class='bar-val'>17.5K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>08</span><span class='bl-desc'>You&#x27;re my pillow. Don&#x27;t mo</span><span class='bl-date'>10-14</span></div><div class='bar-track'><div class='bar-fill' style='width:2.9%'></div><span class='bar-val'>17.2K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>09</span><span class='bl-desc'>What is she trying to tell</span><span class='bl-date'>10-28</span></div><div class='bar-track'><div class='bar-fill' style='width:2.2%'></div><span class='bar-val'>12.7K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>10</span><span class='bl-desc'>what is my cat trying to t</span><span class='bl-date'>10-21</span></div><div class='bar-track'><div class='bar-fill' style='width:2.1%'></div><span class='bar-val'>12.4K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>11</span><span class='bl-desc'>Please don&#x27;t. Not again. O</span><span class='bl-date'>10-30</span></div><div class='bar-track'><div class='bar-fill' style='width:1.8%'></div><span class='bar-val'>10.4K</span></div></div><div class='bar-row'><div class='bar-label'><span class='bl-rank'>12</span><span class='bl-desc'>Why does she keep meowing </span><span class='bl-date'>10-29</span></div><div class='bar-track'><div class='bar-fill' style='width:1.8%'></div><span class='bar-val'>10.3K</span></div></div>
+    <div class="callout"><b>92.9%</b> 的播放集中在 Top 10。内容策略的核心不是"多发"，而是"多试新设定、复用已验证的钩子"。</div>
+    <div class="sec-sub" style="margin-top:20px">按时长分桶的平均播放（TikTok）</div>
+    <div class='mini-row'><span class='mini-k'>≤15s</span><div class='mini-track'><div class='mini-fill' style='width:100%'></div></div><span class='mini-v'>35.7K 均值 · 30 条</span></div><div class='mini-row'><span class='mini-k'>16–30s</span><div class='mini-track'><div class='mini-fill' style='width:6%'></div></div><span class='mini-v'>2.0K 均值 · 3 条</span></div><div class='mini-row'><span class='mini-k'>31–60s</span><div class='mini-track'><div class='mini-fill' style='width:3%'></div></div><span class='mini-v'>951 均值 · 2 条</span></div><div class='mini-row'><span class='mini-k'>>60s</span><div class='mini-track'><div class='mini-fill' style='width:10%'></div></div><span class='mini-v'>3.7K 均值 · 7 条</span></div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">02</span><h2>四类内容原型</h2></div>
+    <div class="sec-sub">同一个产品，四种完全不同的内容打法，流量与用途各不相同。</div>
+    <div class="grid2">
+      <div class="arch"><span class="tag">拉新主力</span><h3>A · 荒诞情景剧</h3><p>前 3 秒抛荒诞设定，宠物第一人称台词，产品最后 2 秒才出现。情绪明确：害怕、黏人、争宠、吃醋。</p><div class="perf">584K · 167K · 111K · 45K · 33K</div></div>
+      <div class="arch"><span class="tag">稳定中腰部</span><h3>B · 提问式日常</h3><p>"What do you want?" / "Are you hungry?" 主人提问 → 宠物答 → 产品点题。真实家庭场景，低制作成本。</p><div class="perf">24.9K · 12.7K · 10.3K · 5.6K</div></div>
+      <div class="arch"><span class="tag">信任 / 转化</span><h3>C · 本地化测评</h3><p>30–143 秒，es / ja / ru 口播，讲参数、开箱与购买渠道。由 reseller 承接，自然流量低但转化意图强。</p><div class="perf">2.8K · 2.6K · 1.8K · 0.7K</div></div>
+      <div class="arch"><span class="tag">低效</span><h3>D · 同脚本多号复投</h3><p>同一剧本换账号/语言再发。算法去重 + 账号权重不足，几乎拿不到推荐。</p><div class="perf">962 · 191 · 115 · 74</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">03</span><h2>钩子：前 3 秒只做一件事</h2></div>
+    <div class="sec-sub">让观众相信"宠物真的在说话"。产品与品牌名在前 3 秒一律不出现。</div>
+    <div class="hooks"><div class='hook'><div class='hook-tag'>荒诞危机</div><blockquote>The water is dangerous. Get out. I&#x27;m scared, but I have to save you.</blockquote><div class='hook-stat'>584,800 播放</div></div><div class='hook'><div class='hook-tag'>关系冲突</div><blockquote>Please don&#x27;t. Not again. Okay, okay.</blockquote><div class='hook-stat'>167,800 播放</div></div><div class='hook'><div class='hook-tag'>身份错位</div><blockquote>You&#x27;re my pillow. Don&#x27;t move. I&#x27;m comfy.</blockquote><div class='hook-stat'>17,200 播放</div></div><div class='hook'><div class='hook-tag'>直接提问</div><blockquote>What do you want, sweetheart? Let&#x27;s hear it. Mommy, I need kisses.</blockquote><div class='hook-stat'>10,300 播放</div></div><div class='hook'><div class='hook-tag'>争宠吃醋</div><blockquote>You&#x27;re my favourite girl in this house… she&#x27;s jealous.</blockquote><div class='hook-stat'>33,800 播放</div></div><div class='hook'><div class='hook-tag'>日常召唤</div><blockquote>Why are you here? Let&#x27;s see what you&#x27;re saying. Do you have snacks?</blockquote><div class='hook-stat'>24,900 播放</div></div></div>
+    <div class="callout" style="margin-top:16px">有效钩子的共同点：<b>荒诞或强关系的处境</b> + <b>宠物第一人称情绪台词</b>，而不是功能播报。反转统一出现在第 8–11 秒。</div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">04</span><h2>CTA：全链路只有一句 "link in my bio"</h2></div>
+    <div class="sec-sub">42 条 TikTok 视频中 22 条 caption 含该句，画面内 CTA 与之相同，没有第二层承接。</div>
+    <div class="grid2">
+      <div class="arch"><h3>现状</h3><p>单一 bio link；无评论区关键词、无优惠码、无多语言 CTA、无主页置顶承接。头部 584K 视频同样只有 bio link。</p></div>
+      <div class="arch"><h3>断点</h3><p>Instagram 侧 193 条"求链接 / 问价"评论只有 11 条得到官方回复（5.7%）；TikTok 侧 reseller 用 WhatsApp 承接，品牌号基本不回复。</p></div>
+    </div>
+    <div class="callout">93% 的播放没有被任何转化路径接住——CTA 不是"不够显眼"，而是<b>只有一层</b>。</div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">05</span><h2>可复用的 12–15 秒结构</h2></div>
+    <div class="sec-sub">头部 5 条全部符合该节奏；偏离结构的长视频适合做信任内容，不适合拉新。</div>
+    <div class="steps">
+      <div class="step"><b>0–2s</b><span>荒诞钩子：一句宠物台词，制造"它在说话"的错觉</span></div>
+      <div class="step"><b>2–8s</b><span>台词 2–3 句，情绪递进：害怕→求救 / 黏人→争宠</span></div>
+      <div class="step"><b>8–11s</b><span>反转：主人反应或第三句台词</span></div>
+      <div class="step"><b>11–13s</b><span>产品名 + 一句功能（全片唯一一次）</span></div>
+      <div class="step"><b>13–15s</b><span>CTA：口播 + 字幕 + 评论区关键词</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">06</span><h2>平台差异</h2></div>
+    <div class="sec-sub">同一素材，两种分发逻辑。</div>
+    <div class="cols">
+      <div class="col">
+        <h3><span class="dot" style="background:#111827"></span>TikTok</h3>
+        <ul>
+          <li>官方账号（pettichat.shorts / pettichatuk / pettichatofficial）英文 + zh-Hans 译制字幕分发。</li>
+          <li>es / ja / ru 由 reseller 本地化承接，形成"官方素材 → 本地渠道"的分层。</li>
+          <li>字幕自带率高（63%），是低成本内容分析的优势平台。</li>
+        </ul>
+      </div>
+      <div class="col">
+        <h3><span class="dot" style="background:var(--accent)"></span>Instagram</h3>
+        <ul>
+          <li>官方 reels 12–37 秒英语，评论问链接占比 59%，官方 0 回复。</li>
+          <li>流量最高的是 reseller / 创作者（789K 播放、17.5K 赞）。</li>
+          <li>无字幕接口，逐字稿需 ASR；评论 API 分页不稳定。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">07</span><h2>建议（按优先级）</h2></div>
+    <ol class="recs">
+      <li><b>每月 2–3 条荒诞情景剧新设定</b>；同一剧本不要多号复投（实测 584K → 45K → 4.4K → 74）。</li>
+      <li><b>前 3 秒永远不放产品</b>，产品名全片只出现一次。</li>
+      <li><b>CTA 升级为三件套</b>：视频内口播 + 评论区置顶关键词 + 主页链接；每个语言版本配本地化 CTA。</li>
+      <li><b>评论区 24 小时内回复</b>：问链接/问价占 59%，目前品牌号几乎不回复。</li>
+      <li><b>本地化交给 reseller，但给统一素材包</b>（台词模板 + 字幕文件 + 一句话卖点），避免长测评拉低自然流量。</li>
+      <li><b>时长控制在 12–15 秒</b>；测评类单独做长视频，不混入拉新投放。</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">08</span><h2>数据附录</h2></div>
+    <div class="sec-sub">TikTok 播放量 Top 10（逐字稿节选）。完整 51 条含时间轴分段的数据见 transcripts.json。</div>
+    <table>
+      <thead><tr><th>#</th><th>平台</th><th>发布</th><th>时长</th><th>播放</th><th>点赞</th><th>逐字稿节选</th></tr></thead>
+      <tbody><tr><td class='rank'>1</td><td>TikTok</td><td class='nowrap'>10-11</td><td class='num nowrap'>12s</td><td class='num'>584.8K</td><td class='num'>38.4K</td><td class='txt'>The water is dangerous. Get out. I&#x27;m scared, but I have to save you.</td></tr><tr><td class='rank'>2</td><td>TikTok</td><td class='nowrap'>10-19</td><td class='num nowrap'>12s</td><td class='num'>167.8K</td><td class='num'>6.6K</td><td class='txt'>Please don&#x27;t. Not again. Okay, okay.</td></tr><tr><td class='rank'>3</td><td>TikTok</td><td class='nowrap'>10-11</td><td class='num nowrap'>15s</td><td class='num'>111.5K</td><td class='num'>3.8K</td><td class='txt'>not now why are you waking me up you&#x27;d never survive out there human excuse me good thing you ha</td></tr><tr><td class='rank'>4</td><td>TikTok</td><td class='nowrap'>10-19</td><td class='num nowrap'>11s</td><td class='num'>45.5K</td><td class='num'>2.2K</td><td class='txt'>The water is dangerous! Get out! I&#x27;m trying to save you! Help!</td></tr><tr><td class='rank'>5</td><td>TikTok</td><td class='nowrap'>10-13</td><td class='num nowrap'>15s</td><td class='num'>33.8K</td><td class='num'>1.7K</td><td class='txt'>You&#x27;re ridiculously cute. Absolutely gorgeous. Best girl ever in the sweetest little thing. You&#x27;</td></tr><tr><td class='rank'>6</td><td>TikTok</td><td class='nowrap'>11-02</td><td class='num nowrap'>15s</td><td class='num'>24.9K</td><td class='num'>1.5K</td><td class='txt'>Why are you here? Let&#x27;s see what you&#x27;re saying. Do you have snacks? Seriously, I come here every</td></tr><tr><td class='rank'>7</td><td>TikTok</td><td class='nowrap'>10-17</td><td class='num nowrap'>102s</td><td class='num'>17.5K</td><td class='num'>253</td><td class='txt'>品 JC ら新元 おーん あっと、やったけれos ああっ、あの人は 皆集まって 3つ無い undertaking これ この時の上がりで 3つ目 くっ 3倍中ですので 興味にある方は一応ねがい</td></tr><tr><td class='rank'>8</td><td>TikTok</td><td class='nowrap'>10-14</td><td class='num nowrap'>12s</td><td class='num'>17.2K</td><td class='num'>710</td><td class='txt'>You&#x27;re my pillow. Don&#x27;t move. I&#x27;m comfy. Okay, fine.</td></tr><tr><td class='rank'>9</td><td>TikTok</td><td class='nowrap'>10-28</td><td class='num nowrap'>15s</td><td class='num'>12.7K</td><td class='num'>415</td><td class='txt'>What is she trying to tell me? Come sit with me. Don&#x27;t go just yet. Oh, you want me to stay? Oka</td></tr><tr><td class='rank'>10</td><td>TikTok</td><td class='nowrap'>10-21</td><td class='num nowrap'>15s</td><td class='num'>12.4K</td><td class='num'>463</td><td class='txt'>what is my cat trying to tell me I want that snack oh really understand what your pet is trying </td></tr></tbody>
+    </table>
+    <div class="note">
+      
+<div class='src-split'>
+  <div class='src-item'><div class='src-num'>24</div><div class='src-k'>平台字幕</div><div class='src-d'>TikTok captionInfos · WebVTT</div></div>
+  <div class='src-item'><div class='src-num'>17</div><div class='src-k'>Whisper ASR</div><div class='src-d'>yt-dlp 音频 + base 模型</div></div>
+  <div class='src-item'><div class='src-num'>1</div><div class='src-k'>缺失</div><div class='src-d'>无音轨 / 下载失败</div></div>
+</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><span class="sec-no">09</span><h2>局限</h2></div>
+    <div class="note">
+      <span class="badge">ASR</span>Whisper <code>base</code> 对非英语口音（es / ja / ur）准确率一般，结论以英语主体内容为准。<br>
+      <span class="badge">缺失</span>2 条无逐字稿：1 条无字幕且音频下载失败，1 条音轨无人声。<br>
+      <span class="badge">口径</span>含 11-01 / 11-02 发布的少量视频，未从十月口径剔除。<br>
+      <span class="badge">字幕</span>平台字幕语言 ≠ 创作者母语（zh-Hans 多为译制字幕）。
+    </div>
+  </section>
+
+  <footer>
+    数据采集：ego lite 浏览器（TikTok 平台字幕 / yt-dlp 音频）· Whisper base 本地转写<br>
+    原始数据 <code>transcripts.json</code> · 分析底稿 <code>ANALYSIS.md</code> · 生成于 2026-11-05
+  </footer>
+</div>
+</body>
+</html>
